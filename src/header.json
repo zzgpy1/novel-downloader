@@ -22,7 +22,7 @@
   ],
   "incompatible": ["Internet Explorer"],
   "match": [
-    "*://101kanshu.com/book/*.html",
+    "*://101kks.com/book/*.html",
     "*://www.sudugu.com/*",
     "*://www.po18.tw/books/*",
     "*://b.faloo.com/*",
@@ -210,6 +210,7 @@
     "*://www.lvsewx.com/ebook/*.html",
     "*://www.shencou.com/books/read_*.html",
     "*://www.tianyabooks.com/*/*/",
+    "*://www.dushu.com/showbook/*",
     "*://www.aixiaxs.net/*/*/",
     "*://jingcaiyuedu6.com/novel/*.html",
     "*://www.hanwujinian.com/book/*",
@@ -303,7 +304,12 @@
     "*://www.69hsz.net/*/",
     "*://m.shauthor.com/*/",
     "*://m.chenkuan.com/*/",
-    "*://www.xfxs1.com/goreadbook/*/"
+    "*://www.xfxs1.com/goreadbook/*/",
+    "*://uukanshu.cc/book/*/",
+    "*://www.zjsw.org/read/*/"
+  ],
+  "include": [
+    "/^https?:\\/\\/(?:www\\.)?booktoki\\d+\\.com\\/novel\\//"
   ],
   "exclude": [
     "*://www.jjwxc.net/onebook.php?novelid=*&chapterid=*",
@@ -384,7 +390,8 @@
     "*://www.69hsz.net/*/*.html",
     "*://m.shauthor.com/*/*.html",
     "*://m.chenkuan.com/*/*.html",
-    "*://www.xfxs1.com/goreadbook/*/*.html"
+    "*://www.xfxs1.com/goreadbook/*/*.html",
+    "*://uukanshu.cc/book/*/*.html"
   ],
   "grant": [
     "unsafeWindow",
@@ -492,6 +499,7 @@
     "https://unpkg.com/vue@3.3.13/dist/vue.global.prod.js",
     "https://unpkg.com/onnxruntime-web@1.22.0/dist/ort.min.js",
     "https://unpkg.com/@oovz/esearch-ocr/dist/eSearchOCR.umd.js",
-    "https://unpkg.com/@techstark/opencv-js@4.11.0-release.1/dist/opencv.js"
+    "https://unpkg.com/@techstark/opencv-js@4.11.0-release.1/dist/opencv.js",
+    "https://unpkg.com/mdui@2/mdui.global.js"
   ]
 }

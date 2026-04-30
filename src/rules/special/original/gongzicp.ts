@@ -25,12 +25,20 @@ export class Gongzicp extends BaseRuleClass {
   public async bookParse() {
     const bookUrl = document.location.href;
 
-    const bookId = (
-      document.querySelector("span.c-light-gray") as HTMLSpanElement
-    ).innerText.replace("CP", "");
-    if (!bookId) {
-      throw new Error("获取bookID出错");
+    // 长佩可能是动态渲染或加载较慢，增加轮询等待元素
+    let bookIdSpan = document.querySelector("span.c-light-gray") as HTMLSpanElement | null;
+    let retry = 0;
+    while (!bookIdSpan && retry < 50) { // 最多等 25 秒
+      await new Promise(r => setTimeout(r, 500));
+      bookIdSpan = document.querySelector("span.c-light-gray") as HTMLSpanElement | null;
+      retry++;
     }
+
+    if (!bookIdSpan) {
+      throw new Error("获取bookID出错: 找不到对应元素(span.c-light-gray)");
+    }
+    const bookId = bookIdSpan.innerText.replace("CP", "");
+
     const novelGetInfoBaseUrl =
       "https://www.gongzicp.com/webapi/novel/novelInfo";
     const novelGetInfoUrl = new URL(novelGetInfoBaseUrl);
@@ -356,6 +364,7 @@ export class Gongzicp extends BaseRuleClass {
     let sectionNumber = 0;
     let sectionName = null;
     let sectionChapterNumber = 0;
+    let chapterNumber = 0;
     for (const chapterObj of _chapterList) {
       if (chapterObj.type === "volume") {
         sectionNumber = chapterObj.vid;
@@ -366,7 +375,8 @@ export class Gongzicp extends BaseRuleClass {
           document.location.origin,
           `read-${chapterObj.id}.html`,
         ].join("/");
-        const chapterNumber = parseInt(chapterObj.order);
+        // const chapterNumber = parseInt(chapterObj.order);
+        chapterNumber++;
         const chapterName = chapterObj.name;
         const isVIP = chapterObj.pay;
         const isPaid = chapterObj.is_sub || chapterObj.is_free_limit === 1;
@@ -462,7 +472,8 @@ export class Gongzicp extends BaseRuleClass {
       updateTime: string; // "2021-02-21 15:31:12",
       postscript: string; // "两人差不多大，许老师大几个月，因为梁老师是天蝎男",
       isSub: number; // 1,
-      chapterPrice: number; // 0,
+      is_free_limit: number; // 0,
+      chapterPrice: number; // 12,
       lock: number; // 0,
       status: number; // 1,
       renderType: number; // 1,
@@ -507,11 +518,11 @@ export class Gongzicp extends BaseRuleClass {
         ) as HTMLDivElement;
         const rightMenuCount = rightMenu.childElementCount;
         const btn1 = (document.querySelector(
-          `.right-menu > div:nth-child(${rightMenuCount - 1}) > a:nth-child(1)`
+          `.right-menu > div:nth-child(${rightMenuCount - 1}) > a`
         ) as HTMLAnchorElement
         );
         const btn2 = (document.querySelector(
-          `.right-menu > div:nth-child(${rightMenuCount}) > a:nth-child(1)`
+          `.right-menu > div:nth-child(${rightMenuCount}) > a`
         ) as HTMLAnchorElement
         );
         if (btn1 && btn1.textContent?.includes("一章")) {
@@ -558,9 +569,9 @@ export class Gongzicp extends BaseRuleClass {
         })
           .then((resp) => resp.json())
           .catch((error) => log.error(error));
-
+        const isPaid = resultI.data.chapterInfo.isSub !== 0 || resultI.data.chapterInfo.is_free_limit !== 0;
         if (
-          resultI.data.chapterInfo.content.length !== 0 &&
+          isPaid &&
           resultI.data.chapterInfo.content.length < 30
         ) {
           retryTime++;
@@ -589,7 +600,7 @@ export class Gongzicp extends BaseRuleClass {
         // 从目录获取章节名
         // const chapterName = chapterInfo.name;
         if (
-          chapterInfo.chapterPrice !== 0 &&
+          // chapterInfo.isSub !== 1 &&
           chapterInfo.content.length === 0
         ) {
           // VIP章节未购买
@@ -601,10 +612,12 @@ export class Gongzicp extends BaseRuleClass {
             contentImages: null,
             additionalMetadate: null,
           };
-        } else if (
-          chapterInfo.chapterPrice === 0 ||
-          (chapterInfo.chapterPrice !== 0 && chapterInfo.content.length !== 0)
-        ) {
+        } else
+          // if (
+          // chapterInfo.isSub !== 1 ||
+          // (chapterInfo.isSub === 1 && chapterInfo.content.length !== 0)
+          // )
+        {
           const content = cpDecrypt(chapterInfo.content);
           const contentRaw = document.createElement("pre");
           contentRaw.innerHTML = content;
@@ -662,7 +675,6 @@ export class Gongzicp extends BaseRuleClass {
               chapterInfo.postscript,
             ].join("\n\n");
           }
-          await sleep(3000 + Math.round(Math.random() * 5000));
           return {
             chapterName,
             contentRaw,

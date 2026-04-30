@@ -4,7 +4,7 @@ export async function getRule(): Promise<BaseRuleClass> {
   const host: string = document.location.host;
   let ruleClass;
   switch (host) {
-    case "101kanshu.com": {
+    case "101kks.com": {
       const { c101kanshu } = await import("../rules/twoPage/101kanshu");
       ruleClass = c101kanshu();
       break;
@@ -266,6 +266,11 @@ export async function getRule(): Promise<BaseRuleClass> {
       ruleClass = uukanshu();
       break;
     }
+    case "uukanshu.cc": {
+      const { uukanshuCc } = await import("../rules/onePage/uukanshuCc");
+      ruleClass = uukanshuCc();
+      break;
+    }
     case "www.westnovel.com": {
       const { westnovel } = await import("../rules/onePage/westnovel");
       ruleClass = westnovel();
@@ -343,6 +348,11 @@ export async function getRule(): Promise<BaseRuleClass> {
         "../rules/onePage/original/houhuayuan"
       );
       ruleClass = houhuayuan();
+      break;
+    }
+    case "www.dushu.com": {
+      const { dushu } = await import("../rules/onePage/dushu");
+      ruleClass = dushu();
       break;
     }
     case "www.tianyabooks.com": {
@@ -905,8 +915,18 @@ export async function getRule(): Promise<BaseRuleClass> {
       ruleClass = Xiguashuwu;
       break;
     }
-
+    case "www.zjsw.org": {
+      const { zjsw } = await import("../rules/onePage/zjsw");
+      ruleClass = zjsw();
+      break;
+    }
     default: {
+      // booktoki 多域名匹配 (booktokiNNN.com)
+      if (/^booktoki\d+\.com$/.test(host) || /^www\.booktoki\d+\.com$/.test(host)) {
+        const { booktoki } = await import("../rules/special/reprint/booktoki");
+        ruleClass = booktoki();
+        break;
+      }
       throw new Error("Not Found Rule!");
     }
   }
